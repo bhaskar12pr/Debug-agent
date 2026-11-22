@@ -1,0 +1,3 @@
+UVM_INFO tb/test.sv(40) @ 0: uvm_test_top [TEST] starting
+xmsim: *E,ASRTST (./dv/sva/soc_decode_checker.sv,19): (time 205 NS) Assertion tb.dut.u_chk_decode.a_addr_mapped has failed
+UVM_FATAL tb/apb_driver.sv(80) @ 855 ns: uvm_test_top.env.agt.drv [APB_TIMEOUT] no PREADY after 64 cycles

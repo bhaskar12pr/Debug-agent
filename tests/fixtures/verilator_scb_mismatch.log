@@ -1,0 +1,10 @@
+UVM_INFO dv/tb/tb_soc_top.sv(125) @ 0: uvm_test_top [TEST] starting test=timer_count seed=1
+UVM_INFO dv/tb/tb_soc_top.sv(99) @ 85000: uvm_test_top [APB_WR] addr=0x10002004 data=0x00000001
+UVM_INFO dv/tb/tb_soc_top.sv(99) @ 115000: uvm_test_top [APB_WR] addr=0x10002000 data=0x00000100
+UVM_INFO dv/tb/tb_soc_top.sv(104) @ 145000: uvm_test_top [APB_RD] addr=0x10002000 data=0x00000102
+UVM_ERROR dv/tb/tb_soc_top.sv(112) @ 145000: uvm_test_top [SCB_MISMATCH] TIMER0.TIMER addr=0x10002000 exp=0x00000100 got=0x00000102
+--- UVM Report Summary ---
+UVM_ERROR : 1
+UVM_FATAL : 0
+TEST timer_count SEED 1 FAILED
+- dv/tb/tb_soc_top.sv:70: Verilog $finish

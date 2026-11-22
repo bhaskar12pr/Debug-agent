@@ -1,0 +1,15 @@
+UVM_INFO dv/tb/tb_soc_top.sv(125) @ 0: uvm_test_top [TEST] starting test=random_rw seed=3
+UVM_INFO dv/tb/tb_soc_top.sv(104) @ 85000: uvm_test_top [APB_RD] addr=0x1000203c data=0x00000000
+UVM_INFO dv/tb/tb_soc_top.sv(104) @ 115000: uvm_test_top [APB_RD] addr=0x10002014 data=0x00000000
+UVM_INFO dv/tb/tb_soc_top.sv(104) @ 145000: uvm_test_top [APB_RD] addr=0x1000101c data=0x00000000
+UVM_INFO dv/tb/tb_soc_top.sv(104) @ 175000: uvm_test_top [APB_RD] addr=0x10003034 data=0x00000000
+[195000] %Error: soc_decode_checker.sv:19: Assertion failed in TOP.tb_soc_top.dut.u_chk_decode.a_addr_mapped: [DBG][DECODE][soc_top.u_apb_node] unmapped address=0x10004024 matches no slave; apb_node holds pready_o=0 (bus will hang)
+-Info: dv/sva/soc_decode_checker.sv:19: Verilog $stop, ignored due to +verilator+error+limit
+[515000] %Error: apb_protocol_checker.sv:51: Assertion failed in TOP.tb_soc_top.dut.u_chk_bus: [DBG][APB][soc_top.bus] stall no PREADY for 32 cycles addr=0x10004024 write=0
+-Info: dv/sva/apb_protocol_checker.sv:51: Verilog $stop, ignored due to +verilator+error+limit
+UVM_FATAL dv/tb/tb_soc_top.sv(88) @ 845000: uvm_test_top [APB_TIMEOUT] no PREADY after 64 cycles: READ addr=0x10004024
+--- UVM Report Summary ---
+UVM_ERROR : 0
+UVM_FATAL : 1
+TEST random_rw SEED 3 FAILED
+- dv/tb/tb_soc_top.sv:70: Verilog $finish

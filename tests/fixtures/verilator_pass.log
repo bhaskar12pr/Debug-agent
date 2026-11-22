@@ -1,0 +1,10 @@
+UVM_INFO dv/tb/tb_soc_top.sv(125) @ 0: uvm_test_top [TEST] starting test=gpio_rw seed=1
+UVM_INFO dv/tb/tb_soc_top.sv(99) @ 85000: uvm_test_top [APB_WR] addr=0x10000000 data=0xa5a55a5a
+UVM_INFO dv/tb/tb_soc_top.sv(104) @ 115000: uvm_test_top [APB_RD] addr=0x10000000 data=0xa5a55a5a
+UVM_INFO dv/tb/tb_soc_top.sv(99) @ 145000: uvm_test_top [APB_WR] addr=0x1000000c data=0x000000f0
+UVM_INFO dv/tb/tb_soc_top.sv(104) @ 175000: uvm_test_top [APB_RD] addr=0x1000000c data=0x000000f0
+--- UVM Report Summary ---
+UVM_ERROR : 0
+UVM_FATAL : 0
+TEST gpio_rw SEED 1 PASSED
+- dv/tb/tb_soc_top.sv:70: Verilog $finish
