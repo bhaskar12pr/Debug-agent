@@ -181,3 +181,25 @@ class RtlIndex:
         lines.append(f"{top}  {mod.file}:{mod.line}")
         walk(mod, top, 1)
         return lines
+
+
+def load_rtl(roots: list[str | Path], backend: str = "auto"):
+    """RTL index: pyslang (exact, elaborated) when installed, else the regex indexer.
+
+    backend: "auto" | "slang" | "regex". Falls back to regex when pyslang is
+    missing or cannot elaborate the sources.
+    """
+    if backend in ("auto", "slang"):
+        try:
+            from .rtl_slang import SlangIndex
+            idx = SlangIndex(roots)
+            if idx.instances:
+                return idx
+            if backend == "slang":
+                raise RuntimeError("pyslang elaborated no instances")
+        except ImportError:
+            if backend == "slang":
+                raise
+    idx = RtlIndex(roots)
+    idx.backend = "regex"
+    return idx

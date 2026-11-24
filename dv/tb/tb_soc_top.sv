@@ -10,6 +10,7 @@
 //   timer_cmp_rw  write/readback timer0 CMP register
 //   timer_count   enable timer0, then write/readback the TIMER count register
 //   random_rw     seeded random reads across 0x1000_0000..0x1000_4FFF
+//                 +NREADS=<n> (default 8), +MAPPED_ONLY to stay inside the address map (KI-001)
 `timescale 1ns/1ps
 
 `define TB_MSG(SEV, ID, MSG) \
@@ -144,8 +145,11 @@ module tb_soc_top;
         check_rw("TIMER0.TIMER", TIMER + 'h00, 32'h0000_0100);
       end
       "random_rw": begin
-        for (int k = 0; k < 8; k++) begin
-          addr = 32'h1000_0000 + ({$urandom_range(0, 4)} << 12) + ({$urandom_range(0, 15)} << 2);
+        int nreads = 8;
+        void'($value$plusargs("NREADS=%d", nreads));
+        for (int k = 0; k < nreads; k++) begin
+          int region = $test$plusargs("MAPPED_ONLY") ? $urandom_range(0, 3) : $urandom_range(0, 4);
+          addr = 32'h1000_0000 + ({region} << 12) + ({$urandom_range(0, 15)} << 2);
           apb_read(addr, rd);
         end
       end
@@ -157,8 +161,10 @@ module tb_soc_top;
   end
 
   initial begin
+    string dumpfile = "waves.vcd";
+    void'($value$plusargs("DUMPFILE=%s", dumpfile));
     if ($test$plusargs("WAVES")) begin
-      $dumpfile("waves.vcd");
+      $dumpfile(dumpfile);
       $dumpvars(0, tb_soc_top);
     end
   end

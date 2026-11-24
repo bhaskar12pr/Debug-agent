@@ -11,8 +11,9 @@ import re
 from pathlib import Path
 
 from .logparse import Event, context, failures, first_failure, parse_log, signature
-from .rtl import RtlIndex
+from .rtl import load_rtl
 from .vcd import Vcd
+from .vcd import open_waveform
 
 
 def _failure_timeline(events: list[Event]) -> list[str]:
@@ -43,7 +44,7 @@ def _wave_signals(vcd: Vcd, ev: Event, extra: list[str]) -> list[str]:
     return out[:24]
 
 
-def _rtl_section(idx: RtlIndex, ev: Event) -> list[str]:
+def _rtl_section(idx, ev: Event) -> list[str]:
     out: list[str] = []
     inst = ev.dbg_instance or ""
     if not inst:
@@ -62,7 +63,8 @@ def _rtl_section(idx: RtlIndex, ev: Event) -> list[str]:
 
 
 def build(run_dir: str | Path, rtl_roots: list[str | Path] | None = None, signals: list[str] | None = None,
-          before_ps: float = 200_000, after_ps: float = 50_000) -> str:
+          before_ps: float = 200_000, after_ps: float = 50_000, rtl_backend: str = "auto",
+          wave_backend: str = "auto") -> str:
     run_dir = Path(run_dir)
     log = run_dir / "sim.log" if run_dir.is_dir() else run_dir
     run_dir = log.parent
@@ -83,20 +85,21 @@ def build(run_dir: str | Path, rtl_roots: list[str | Path] | None = None, signal
             "", "## Failure timeline (deduplicated)", "", *_failure_timeline(events),
             "", "## Log context", "", "```", context(log, first.log_line), "```"]
 
-    vcd_path = run_dir / "waves.vcd"
-    if vcd_path.exists() and first.time_ps() is not None:
-        vcd = Vcd(vcd_path)
+    vcd_path = next((run_dir / n for n in ("waves.fst", "waves.vcd") if (run_dir / n).exists()), None)
+    if vcd_path is not None and first.time_ps() is not None:
+        vcd = open_waveform(vcd_path, wave_backend)
         sigs = _wave_signals(vcd, first, signals or [])
         if sigs:
             t0 = max(0.0, first.time_ps() - before_ps)
-            out += ["", f"## Waveform window {t0:g}..{first.time_ps() + after_ps:g} ps", "", "```",
+            out += ["", f"## Waveform window {t0:g}..{first.time_ps() + after_ps:g} ps "
+                    f"(`{vcd_path.name}`, {getattr(vcd, 'backend', 'vcd')})", "", "```",
                     vcd.window(sigs, t0, first.time_ps() + after_ps), "```"]
         else:
             out += ["", "## Waveform", "", f"- `{vcd_path}` exists; pass --signals to pick signals"]
 
     if rtl_roots:
-        idx = RtlIndex(rtl_roots)
+        idx = load_rtl(rtl_roots, rtl_backend)
         sec = _rtl_section(idx, first)
         if sec:
-            out += ["", "## RTL", "", *sec]
+            out += ["", f"## RTL ({idx.backend})", "", *sec]
     return "\n".join(out)

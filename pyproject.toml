@@ -5,6 +5,13 @@ description = "Tools for an AI debug agent that root-causes SoC verification fai
 requires-python = ">=3.10"
 dependencies = []
 
+[project.optional-dependencies]
+# Optional backends, auto-detected at run time:
+#   pyslang  - real SystemVerilog front end: generate blocks, macros, parameters, lint
+#   pywellen - fast VCD reader, and FST/GHW support
+fast = ["pyslang>=10", "pywellen>=0.20"]
+dev = ["pytest"]
+
 [project.scripts]
 debug-agent = "debug_agent.cli:main"
 

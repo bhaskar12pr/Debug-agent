@@ -26,6 +26,8 @@ for the agent's own diagnoses.
   that returns `pready=1, pslverr=1` for unmapped addresses, per APB3 error
   response; (DV owner) until then, constrain `random_rw` to mapped regions
   and add a directed `unmapped_access` test that expects PSLVERR.
+- **Workaround verified:** `random_rw +MAPPED_ONLY` (regions 0..3 only) ran
+  20,000 random reads with no failures, consistent with this root cause.
 
 ## KI-002: Readback of a free-running counter register
 

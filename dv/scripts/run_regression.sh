@@ -4,6 +4,7 @@
 set -uo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
 n="${1:-10}"
+mkdir -p "$here/../../runs"
 {
   for t in gpio_rw timer_cmp_rw timer_count; do "$here/run_sim.sh" "$t" 1; done
   for s in $(seq 1 "$n"); do "$here/run_sim.sh" random_rw "$s"; done

@@ -26,6 +26,7 @@ the sibling of [coverage_agent](https://github.com/bhaskar12pr/coverage_agent).
 
 ```sh
 git clone https://github.com/bhaskar12pr/SOC_VERIF ../SOC_VERIF     # or set SOC_VERIF=/path
+pip install -e '.[fast]'                 # optional: pyslang + pywellen backends (see below)
 dv/scripts/run_regression.sh 10          # needs Verilator 5.x
 python3 -m debug_agent triage runs/
 python3 -m debug_agent evidence runs/random_rw_s3
@@ -43,7 +44,30 @@ python3 -m debug_agent wave     <vcd> --signals GLOB --from PS --to PS
 python3 -m debug_agent signals  <vcd> PATTERN
 python3 -m debug_agent drivers  soc_top.u_apb_spi_master.PREADY   # traces through sub-module ports
 python3 -m debug_agent hier     soc_top
+python3 -m debug_agent lint     [--errors]            # compiler diagnostics (pyslang)
 ```
+
+### Optional backends: pyslang and pywellen
+
+The toolkit runs on the Python standard library alone. With the `fast` extras
+installed, it switches automatically (`--rtl-backend` / `--wave-backend` to force one):
+
+| | built-in | with library |
+|---|---|---|
+| RTL | regex indexer | **pyslang**: elaborated design, macros, `generate` instances (`TIMER_GEN[0].timer_i`), resolved parameters, `lint` |
+| Waveforms | text VCD reader | **pywellen**: VCD, **FST**, GHW |
+
+Measured on SOC_VERIF (20,000-read `random_rw`, 14 signals, 200 ns window):
+
+| dump | reader | open + query |
+|---|---|---|
+| `waves.vcd` 13.7 MB | built-in | 1.93 s |
+| `waves.vcd` 13.7 MB | pywellen | 1.04 s |
+| `waves.fst` 0.62 MB (`WAVES=fst`) | pywellen | 0.37 s |
+
+pyslang elaborates all 17 SOC_VERIF files plus the TB and checkers in under
+0.1 s, finds both `timer_i` generate instances (the regex indexer finds one
+merged instance) and gives 68 lint warnings on the vendor RTL.
 
 - **Log parser:** UVM report format, Verilator, Questa, VCS and Xcelium assertion/error
   formats, plus `[DBG][CATEGORY][instance]` debug-point messages. The Verilator
@@ -83,8 +107,9 @@ python3 -m pytest -q
 
 ## Limits
 
-- RTL indexing is regex-based: macros, generate-for instance arrays,
-  interfaces and structs can be missed (the tools say so, and the skills fall back to grep).
+- Without pyslang, RTL indexing is regex-based: macros, generate-for instance
+  arrays, interfaces and structs can be missed (install `.[fast]`).
+- FSDB still needs conversion (`fsdb2vcd`); reading FSDB directly requires Synopsys's licensed library.
 - The TB is directed SV, not UVM (Verilator can't run the UVM library). The
   tools parse real UVM logs from commercial simulators the same way.
 - `run_sim.sh` targets Verilator; for VCS/Xcelium/Questa, swap the build/run

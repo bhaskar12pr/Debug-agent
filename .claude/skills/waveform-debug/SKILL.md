@@ -17,4 +17,7 @@ python3 -m debug_agent wave runs/<run>/waves.vcd --signals 'TOP.tb_soc_top.dut.u
   assertion saw: query those first.
 - `'bxxxx` means X/Z. Find where the X starts and trace its driver with rtl-trace.
 - Glob `*` matches across hierarchy dots; anchor with a full prefix to keep it small.
+- Brackets in patterns are literal: `'*TIMER_GEN[0].timer_i.*'` works as written.
+- FST (`waves.fst`, from `WAVES=fst`) is read with pywellen, which is also used
+  for VCD when installed (about 2x faster on large VCDs, 5x on the same dump as FST).
 - FSDB: convert only the needed scope/window first (Verdi `fsdb2vcd -s <scope> -bt -et`).

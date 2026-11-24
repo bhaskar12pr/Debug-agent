@@ -96,8 +96,10 @@ class Vcd:
 
     def find(self, pattern: str) -> list[str]:
         """Signal paths matching a glob (``*paddr*``) or a plain substring."""
-        if any(c in pattern for c in "*?["):
-            return [p for p in self.signals if fnmatch.fnmatchcase(p, pattern)]
+        if any(c in pattern for c in "*?"):
+            # Brackets are literal (TIMER_GEN[0], bus[7:0]), not glob character classes.
+            pat = re.sub(r"[\[\]]", lambda m: f"[{m.group()}]", pattern)
+            return [p for p in self.signals if fnmatch.fnmatchcase(p, pat)]
         return [p for p in self.signals if pattern in p]
 
     def load(self, paths: list[str]) -> list[Signal]:
@@ -156,3 +158,21 @@ class Vcd:
             out.append("unchanged in window:")
             out += [f"  {s.path} = {fmt_value(s.value_at(t0), s.width)}" for s in static]
         return "\n".join(out)
+
+
+def open_waveform(path: str | Path, backend: str = "auto") -> "Vcd":
+    """pywellen when installed (required for .fst/.ghw), else this built-in VCD reader.
+
+    backend: "auto" | "wellen" | "vcd".
+    """
+    path = Path(path)
+    if backend in ("auto", "wellen") or path.suffix in (".fst", ".ghw"):
+        try:
+            from .wave_wellen import WellenWave
+            return WellenWave(path)
+        except ImportError:
+            if backend == "wellen" or path.suffix in (".fst", ".ghw"):
+                raise ImportError(f"reading {path.name} needs pywellen: pip install pywellen") from None
+    v = Vcd(path)
+    v.backend = "vcd"
+    return v
